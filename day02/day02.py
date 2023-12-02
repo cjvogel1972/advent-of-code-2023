@@ -3,34 +3,25 @@ import re
 from util.file import readfile
 
 game_num_re = re.compile("Game ([0-9]*):")
-red_re = re.compile("([0-9]*) red")
-blue_re = re.compile("([0-9]*) blue")
-green_re = re.compile("([0-9]*) green")
+cube_re = re.compile("([0-9]*) (red|green|blue)")
 
 
 def solve_part1(lines: list[str]) -> int:
     total = 0
 
+    max_colors = {
+        "red": 12,
+        "green": 13,
+        "blue": 14,
+    }
+
     for line in lines:
         good_grab = True
         game_number = int(game_num_re.findall(line)[0])
 
-        colon_loc = line.index(":")
-        grabs = line[colon_loc + 1:].split(";")
-
-        for grab in grabs:
-            red = find_number(grab, red_re)
-            if red > 12:
-                good_grab = False
-                break
-
-            green = find_number(grab, green_re)
-            if green > 13:
-                good_grab = False
-                break
-
-            blue = find_number(grab, blue_re)
-            if blue > 14:
+        result = cube_re.findall(line)
+        for grab in result:
+            if int(grab[0]) > max_colors[grab[1]]:
                 good_grab = False
                 break
 
@@ -44,31 +35,22 @@ def solve_part2(lines: list[str]) -> int:
     total = 0
 
     for line in lines:
-        red = 0
-        green = 0
-        blue = 0
+        max_colors = {
+            "red": 0,
+            "green": 0,
+            "blue": 0,
+        }
 
-        colon_loc = line.index(":")
-        grabs = line[colon_loc + 1:].split(";")
+        result = cube_re.findall(line)
+        for grab in result:
+            if int(grab[0]) > max_colors[grab[1]]:
+                max_colors[grab[1]] = int(grab[0])
 
-        for grab in grabs:
-            red = max(red, find_number(grab, red_re))
-            green = max(green, find_number(grab, green_re))
-            blue = max(blue, find_number(grab, blue_re))
-
-        total += (red * green * blue)
+        power = 1
+        for x in max_colors.values(): power *= x
+        total += power
 
     return total
-
-
-def find_number(grab: str, regex: re) -> int:
-    number = 0
-
-    result = regex.findall(grab)
-    if len(result) > 0:
-        number = int(result[0])
-
-    return number
 
 
 if __name__ == '__main__':
