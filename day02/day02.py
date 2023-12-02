@@ -15,33 +15,24 @@ def solve_part1(lines: list[str]) -> int:
         good_grab = True
         game_number = int(game_num_re.findall(line)[0])
 
-        start_search = line.index(":")
-        done = False
+        colon_loc = line.index(":")
+        grabs = line[colon_loc + 1:].split(";")
 
-        while not done:
-            semicolon_loc = line.find(";", start_search + 1)
-            if semicolon_loc == -1:
-                done = True
-                semicolon_loc = len(line)
-
-            grab = line[start_search + 1: semicolon_loc]
-
+        for grab in grabs:
             red = find_number(grab, red_re)
             if red > 12:
                 good_grab = False
-                done = True
+                break
 
             green = find_number(grab, green_re)
             if green > 13:
                 good_grab = False
-                done = True
+                break
 
             blue = find_number(grab, blue_re)
             if blue > 14:
                 good_grab = False
-                done = True
-
-            start_search = semicolon_loc
+                break
 
         if good_grab:
             total += game_number
@@ -57,22 +48,13 @@ def solve_part2(lines: list[str]) -> int:
         green = 0
         blue = 0
 
-        start_search = line.index(":")
-        done = False
+        colon_loc = line.index(":")
+        grabs = line[colon_loc + 1:].split(";")
 
-        while not done:
-            semicolon_loc = line.find(";", start_search + 1)
-            if semicolon_loc == -1:
-                done = True
-                semicolon_loc = len(line)
-
-            grab = line[start_search + 1: semicolon_loc]
-
+        for grab in grabs:
             red = max(red, find_number(grab, red_re))
             green = max(green, find_number(grab, green_re))
             blue = max(blue, find_number(grab, blue_re))
-
-            start_search = semicolon_loc
 
         total += (red * green * blue)
 
