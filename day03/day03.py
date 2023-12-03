@@ -2,39 +2,43 @@ import re
 
 from util.file import readfile
 
+num_re = re.compile("([0-9]+)")
+
 
 def solve_part1(lines: list[str]) -> int:
     total = 0
-    num_re = re.compile("([0-9]+)")
 
-    for i in range(len(lines)):
-        line = lines[i]
+    for i, line in enumerate(lines):
         search_results = num_re.findall(line)
         start_find = 0
-        for result in search_results:
-            loc = line.find(result, start_find)
-            start_find = loc + len(result)
+        for num in search_results:
+            loc = line.find(num, start_find)
+            start_find = loc + len(num)
 
-            check_lines = []
-            if i > 0:
-                check_lines.append(lines[i - 1])
-            check_lines.append(line)
-            if i < (len(lines) - 1):
-                check_lines.append(lines[i + 1])
-
-            if find_symbol(check_lines, loc, len(result)):
-                total += int(result)
+            check_lines = get_check_lines(lines, i)
+            if find_symbol(check_lines, loc, len(num)):
+                total += int(num)
 
     return total
+
+
+def get_check_lines(lines: list[str], current_line: int) -> list[str]:
+    check_lines = []
+
+    if current_line > 0:
+        check_lines.append(lines[current_line - 1])
+    check_lines.append(lines[current_line])
+    if current_line < (len(lines) - 1):
+        check_lines.append(lines[current_line + 1])
+
+    return check_lines
 
 
 def find_symbol(lines: list[str], loc: int, number_len: int) -> bool:
     found = False
 
     for line in lines:
-        start = loc - 1
-        if loc == 0:
-            start = loc
+        start = loc if loc == 0 else loc - 1
         sub_line = line[start:loc + number_len + 1]
         for c in sub_line:
             if not (c.isnumeric() or c == "."):
@@ -46,19 +50,12 @@ def find_symbol(lines: list[str], loc: int, number_len: int) -> bool:
 def solve_part1_alt(lines: list[str]) -> int:
     total = 0
 
-    for i in range(len(lines)):
-        for j in range(len(lines[i])):
-            c = lines[i][j]
+    for i, line in enumerate(lines):
+        for j, c in enumerate(line):
             if c.isnumeric() or c == ".":
                 continue
             else:
-                check_lines = []
-                if i > 0:
-                    check_lines.append(lines[i - 1])
-                check_lines.append(lines[i])
-                if i < (len(lines) - 1):
-                    check_lines.append(lines[i + 1])
-
+                check_lines = get_check_lines(lines, i)
                 numbers = find_numbers(check_lines, j)
                 for k in numbers:
                     total += k
@@ -69,17 +66,10 @@ def solve_part1_alt(lines: list[str]) -> int:
 def solve_part2(lines: list[str]) -> int:
     total = 0
 
-    for i in range(len(lines)):
-        for j in range(len(lines[i])):
-            c = lines[i][j]
+    for i, line in enumerate(lines):
+        for j, c in enumerate(line):
             if c == "*":
-                check_lines = []
-                if i > 0:
-                    check_lines.append(lines[i - 1])
-                check_lines.append(lines[i])
-                if i < (len(lines) - 1):
-                    check_lines.append(lines[i + 1])
-
+                check_lines = get_check_lines(lines, i)
                 numbers = find_numbers(check_lines, j)
 
                 if len(numbers) == 2:
@@ -89,9 +79,7 @@ def solve_part2(lines: list[str]) -> int:
 
 
 def find_numbers(lines: list[str], loc: int) -> list[int]:
-    result = []
-
-    num_re = re.compile("([0-9]+)")
+    numbers = []
 
     for line in lines:
         search_results = num_re.findall(line)
@@ -100,9 +88,9 @@ def find_numbers(lines: list[str], loc: int) -> list[int]:
             num_loc = line.find(num, start_loc)
             start_loc = num_loc + len(num)
             if (num_loc - 1) <= loc <= (num_loc + len(num)):
-                result.append(int(num))
+                numbers.append(int(num))
 
-    return result
+    return numbers
 
 
 if __name__ == '__main__':
