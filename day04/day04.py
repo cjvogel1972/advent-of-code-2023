@@ -20,17 +20,17 @@ def solve_part1(lines: list[str]) -> int:
 def solve_part2(lines: list[str]) -> int:
     total = 0
 
-    card_instances = {}
+    card_instances = []
     for i in range(len(lines)):
-        card_instances[i] = 1
+        card_instances.append(1)
 
     for i, line in enumerate(lines):
         winners = number_card_winners(line)
 
         for j in range(winners):
-            card_instances[i + j + 1] = card_instances[i + j + 1] + (1 * card_instances[i])
+            card_instances[i + j + 1] += 1 * card_instances[i]
 
-    for count in card_instances.values():
+    for count in card_instances:
         total += count
 
     return total
@@ -55,7 +55,7 @@ def number_card_winners(line: str) -> int:
 
 
 if __name__ == '__main__':
-    lines = readfile("day04/input.txt")
+    input_lines = readfile("day04/input.txt")
 
-    print(f'Part 1: {solve_part1(lines)}')
-    print(f'Part 2: {solve_part2(lines)}')
+    print(f'Part 1: {solve_part1(input_lines)}')
+    print(f'Part 2: {solve_part2(input_lines)}')
