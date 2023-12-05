@@ -31,9 +31,9 @@ def solve_part2(lines: list[str]) -> int:
 
     for line in lines:
         numbers = ""
-        for i in range(len(line)):
-            if line[i].isnumeric():
-                numbers += line[i]
+        for i, c in enumerate(line):
+            if c.isnumeric():
+                numbers += c
             else:
                 for name in words_to_numbers:
                     if line[i:i + len(name)] == name:
