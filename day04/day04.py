@@ -20,9 +20,7 @@ def solve_part1(lines: list[str]) -> int:
 def solve_part2(lines: list[str]) -> int:
     total = 0
 
-    card_instances = []
-    for i in range(len(lines)):
-        card_instances.append(1)
+    card_instances = [1 for _ in lines]
 
     for i, line in enumerate(lines):
         winners = number_card_winners(line)
