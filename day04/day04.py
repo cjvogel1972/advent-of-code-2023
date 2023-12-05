@@ -30,8 +30,7 @@ def solve_part2(lines: list[str]) -> int:
         for j in range(winners):
             card_instances[i + j + 1] += 1 * card_instances[i]
 
-    for count in card_instances:
-        total += count
+    total = sum(card_instances)
 
     return total
 
