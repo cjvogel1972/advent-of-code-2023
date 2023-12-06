@@ -23,16 +23,19 @@ def solve_part2(lines: list[str]) -> int:
 
 
 def compute_record_setting_races(race_time: int, race_distance: int) -> int:
-    beat_record = 0
+    does_not_beat_record = 0
 
-    for button_push_time in range(race_time + 1):
+    for button_push_time in range(int(race_time / 2)):
         speed = button_push_time
         run_time = race_time - speed
         distance = speed * run_time
 
-        beat_record += 1 if distance > race_distance else 0
+        if race_distance >= distance:
+            does_not_beat_record += 1
+        else:
+            break
 
-    return beat_record
+    return race_time + 1 - (does_not_beat_record * 2)
 
 
 if __name__ == '__main__':
