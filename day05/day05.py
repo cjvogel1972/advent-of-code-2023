@@ -1,136 +1,98 @@
-import sys
-
-from util.file import readfile
+from util.file import readfile_blocks
 
 
-def solve_part1(lines: list[str]) -> int:
-    seeds = {}
-    for i in [int(n) for n in lines[0][6:].split()]:
-        seeds[i] = 0
+def solve_part1(blocks: list[str]) -> int:
+    seeds_input, *others = blocks
+    seeds = list(map(int, seeds_input.split(":")[1].split()))
 
-    mappings = {
-        "seeds_to_soil": [],
-        "soil_to_fertilizer": [],
-        "fertilizer_to_water": [],
-        "water_to_light": [],
-        "light_to_temperature": [],
-        "temperature_to_humidity": [],
-        "humidity_to_location": []
-    }
-    mappings_list = list(mappings.keys())
-    mapping_index = -1
-    skip_next_line = True
+    mappings = parse_mapping_blocks(others)
 
-    for i, line in enumerate(lines):
-        if skip_next_line:
-            skip_next_line = False
-            continue
-
-        if len(line) == 0:
-            mapping_index += 1
-            skip_next_line = True
-            continue
-
-        nums = [int(n) for n in line.split()]
-        mappings[mappings_list[mapping_index]].append(Mapping(*nums))
-
+    values = []
     for seed in seeds:
         value = seed
-        for mapping_list in mappings.values():
+        for mapping_list in mappings:
             value = map_value(value, mapping_list)
 
-        seeds[seed] = value
+        values.append(value)
 
-    return seeds[min(seeds)]
+    return min(values)
+
+
+def parse_mapping_blocks(blocks):
+    mappings = []
+
+    for block in blocks:
+        current_mapping = []
+        for line in block.splitlines()[1:]:
+            current_mapping.append(Mapping(*list(map(int, line.split()))))
+        mappings.append(current_mapping)
+
+    return mappings
 
 
 def map_value(value, mappings):
     for m in mappings:
-        if m.source <= value <= m.source + m.size:
-            return m.dest + (value - m.source)
+        if m.source <= value <= m.source_end:
+            return m.map_source_value(value)
     return value
 
 
-def solve_part2(lines: list[str]) -> int:
-    seed_input = [int(n) for n in lines[0][6:].split()]
-    seeds = {}
-    for i in range(0, len(seed_input), 2):
-        seeds[SeedRange(seed_input[i], seed_input[i + 1])] = sys.maxsize
+def solve_part2(blocks: list[str]) -> int:
+    seeds_input, *others = blocks
+    seeds_input = list(map(int, seeds_input.split(":")[1].split()))
+    seeds = [SeedRange(seeds_input[i], seeds_input[i + 1]) for i in range(0, len(seeds_input), 2)]
 
-    mappings = {
-        "seeds_to_soil": [],
-        "soil_to_fertilizer": [],
-        "fertilizer_to_water": [],
-        "water_to_light": [],
-        "light_to_temperature": [],
-        "temperature_to_humidity": [],
-        "humidity_to_location": []
-    }
-    mappings_list = list(mappings.keys())
-    mapping_index = -1
-    skip_next_line = True
+    mappings = parse_mapping_blocks(others)
 
-    for i, line in enumerate(lines):
-        if skip_next_line:
-            skip_next_line = False
-            continue
-
-        if len(line) == 0:
-            mapping_index += 1
-            skip_next_line = True
-            continue
-
-        nums = [int(n) for n in line.split()]
-        mappings[mappings_list[mapping_index]].append(Mapping(*nums))
-
+    values = []
     for seed in seeds:
-        ranges = [(seed.start, seed.start + seed.size)]
-        for mapping_list in mappings.values():
+        ranges = [(seed.start, seed.end)]
+        for mapping_list in mappings:
             ranges = ranges_all_mappings(ranges, mapping_list)
 
-        seeds[seed] = min(ranges)[0]
+        values.append(min(ranges)[0])
 
-    result = sys.maxsize
-    for value in seeds.values():
-        result = min(result, value)
-    return result
+    return min(values)
 
 
 def ranges_all_mappings(ranges, mappings):
     answer = []
     for m in mappings:
-        my_end = m.source + m.size
         new_ranges = []
         for r in ranges:
             start, end = r
             before = (start, min(end, m.source))
-            inside = (max(start, m.source), min(my_end, end))
-            after = (max(my_end, start), end)
+            overlap = (max(start, m.source), min(m.source_end, end))
+            after = (max(m.source_end, start), end)
             if before[1] > before[0]:
                 new_ranges.append(before)
-            if inside[1] > inside[0]:
-                answer.append((m.dest + inside[0] - m.source, m.dest + inside[1] - m.source))
+            if overlap[1] > overlap[0]:
+                answer.append((m.map_source_value(overlap[0]), m.map_source_value(overlap[1])))
             if after[1] > after[0]:
                 new_ranges.append(after)
         ranges = new_ranges
-    return answer + new_ranges
+    return answer + ranges
 
 
 class Mapping:
     def __init__(self, dest: int, source: int, size: int):
         self.dest = dest
+        self.dest_end = self.dest + size
         self.source = source
-        self.size = size
+        self.source_end = self.source + size
+
+    def map_source_value(self, value: int) -> int:
+        return self.dest + value - self.source
 
 
 class SeedRange:
     def __init__(self, start: int, size: int):
         self.start = start
-        self.size = size
+        self.end = start + size
 
 
 if __name__ == '__main__':
-    input_lines = readfile("day05/input.txt")
+    input_blocks = readfile_blocks("day05/input.txt")
 
-    print(f'Part 1: {solve_part1(input_lines)}')
-    print(f'Part 2: {solve_part2(input_lines)}')
+    print(f'Part 1: {solve_part1(input_blocks)}')
+    print(f'Part 2: {solve_part2(input_blocks)}')
