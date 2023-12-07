@@ -41,25 +41,41 @@ class Hand:
         puzzle_input = line.split()
         self.cards = puzzle_input[0]
         self.bid = int(puzzle_input[1])
+        self.card_order = card_order
+        counts = self.count_cards()
+
+        self.hand_type = self.determine_hand_type_from_counts(counts)
+
+    def count_cards(self) -> list[int]:
+        card_count = self.map_cards_to_counts()
+
+        return list(card_count.values())
+
+    def map_cards_to_counts(self) -> dict[str, int]:
         card_count = {}
         for c in self.cards:
             card_count[c] = card_count.get(c, 0) + 1
-        counts = list(card_count.values())
 
+        return card_count
+
+    @staticmethod
+    def determine_hand_type_from_counts(counts: list[int]) -> int:
         if counts.count(5) == 1:
-            self.hand_type = FIVE_KIND
+            hand_type = FIVE_KIND
         elif counts.count(4) == 1:
-            self.hand_type = FOUR_KIND
+            hand_type = FOUR_KIND
         elif counts.count(3) == 1 and counts.count(2) == 1:
-            self.hand_type = FULL_HOUSE
+            hand_type = FULL_HOUSE
         elif counts.count(3) == 1:
-            self.hand_type = THREE_KIND
+            hand_type = THREE_KIND
         elif counts.count(2) == 2:
-            self.hand_type = TWO_PAIR
+            hand_type = TWO_PAIR
         elif counts.count(2) == 1:
-            self.hand_type = ONE_PAIR
+            hand_type = ONE_PAIR
         else:
-            self.hand_type = HIGH_CARD
+            hand_type = HIGH_CARD
+
+        return hand_type
 
     def __lt__(self, other):
         if self.hand_type < other.hand_type:
@@ -71,7 +87,7 @@ class Hand:
             oc = other.cards[i]
             if c == oc:
                 continue
-            if card_order.index(c) < card_order.index(oc):
+            if self.card_order.index(c) < self.card_order.index(oc):
                 return True
             else:
                 return False
@@ -85,14 +101,13 @@ class Hand:
         return f"cards: {self.cards} bid: {self.bid} hand type: {self.hand_type}"
 
 
-class JokerHand:
+class JokerHand(Hand):
     def __init__(self, line: str):
-        puzzle_input = line.split()
-        self.cards = puzzle_input[0]
-        self.bid = int(puzzle_input[1])
-        card_count = {}
-        for c in self.cards:
-            card_count[c] = card_count.get(c, 0) + 1
+        Hand.__init__(self, line)
+        self.card_order = joker_card_order
+
+    def count_cards(self) -> list[int]:
+        card_count = self.map_cards_to_counts()
 
         joker_count = card_count.get('J', 0)
         if joker_count > 0 and joker_count != 5:
@@ -106,45 +121,7 @@ class JokerHand:
                     max_count = card_count[c]
             card_count[max_card] = card_count[max_card] + joker_count
 
-        counts = list(card_count.values())
-
-        if counts.count(5) == 1:
-            self.hand_type = FIVE_KIND
-        elif counts.count(4) == 1:
-            self.hand_type = FOUR_KIND
-        elif counts.count(3) == 1 and counts.count(2) == 1:
-            self.hand_type = FULL_HOUSE
-        elif counts.count(3) == 1:
-            self.hand_type = THREE_KIND
-        elif counts.count(2) == 2:
-            self.hand_type = TWO_PAIR
-        elif counts.count(2) == 1:
-            self.hand_type = ONE_PAIR
-        else:
-            self.hand_type = HIGH_CARD
-
-    def __lt__(self, other):
-        if self.hand_type < other.hand_type:
-            return True
-        elif self.hand_type > other.hand_type:
-            return False
-
-        for i, c in enumerate(self.cards):
-            oc = other.cards[i]
-            if c == oc:
-                continue
-            if joker_card_order.index(c) < joker_card_order.index(oc):
-                return True
-            else:
-                return False
-
-        return False
-
-    def __str__(self):
-        return f"cards: {self.cards} bid: {self.bid} hand type: {self.hand_type}"
-
-    def __repr__(self):
-        return f"cards: {self.cards} bid: {self.bid} hand type: {self.hand_type}"
+        return list(card_count.values())
 
 
 if __name__ == '__main__':
