@@ -61,15 +61,17 @@ def ranges_all_mappings(ranges, mappings):
         new_ranges = []
         for r in ranges:
             start, end = r
-            before = (start, min(end, m.source))
             overlap = (max(start, m.source), min(m.source_end, end))
-            after = (max(m.source_end, start), end)
-            if before[1] > before[0]:
-                new_ranges.append(before)
             if overlap[1] > overlap[0]:
                 answer.append((m.map_source_value(overlap[0]), m.map_source_value(overlap[1])))
-            if after[1] > after[0]:
-                new_ranges.append(after)
+                before = (start, overlap[0])
+                if before[1] > before[0]:
+                    new_ranges.append(before)
+                after = (overlap[1], end)
+                if after[1] > after[0]:
+                    new_ranges.append(after)
+            else:
+                new_ranges.append((start, end))
         ranges = new_ranges
     return answer + ranges
 
