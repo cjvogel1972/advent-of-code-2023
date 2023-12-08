@@ -54,10 +54,7 @@ def compute_moves(curr_node, directions, nodes, end_check):
     moves = 0
     while not at_end:
         for d in directions:
-            if d == 'L':
-                curr_node = nodes[curr_node.left]
-            else:
-                curr_node = nodes[curr_node.right]
+            curr_node = nodes[curr_node.next_node(d)]
 
             moves += 1
 
@@ -71,6 +68,14 @@ def compute_moves(curr_node, directions, nodes, end_check):
 class Node:
     def __init__(self, line: str):
         self.name, self.left, self.right = node_re.findall(line)[0]
+
+    def next_node(self, direction: str) -> str:
+        if direction == 'L':
+            next_node_name = self.left
+        else:
+            next_node_name = self.right
+
+        return next_node_name
 
 
 if __name__ == '__main__':
