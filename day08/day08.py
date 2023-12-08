@@ -22,10 +22,7 @@ def part1_at_end_check(name: str) -> bool:
 def solve_part2(lines: list[str]) -> int:
     directions, nodes = parse_directions_nodes(lines)
 
-    start_nodes = []
-    for name in nodes.keys():
-        if name[-1] == 'A':
-            start_nodes.append(nodes[name])
+    start_nodes = [name for name in nodes.keys() if name.endswith('A')]
 
     all_moves = []
     for start_node in start_nodes:
@@ -36,7 +33,7 @@ def solve_part2(lines: list[str]) -> int:
 
 
 def part2_at_end_check(name: str) -> bool:
-    return name[-1] == 'Z'
+    return name.endswith('Z')
 
 
 def parse_directions_nodes(lines):
