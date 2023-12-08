@@ -9,8 +9,8 @@ node_re = re.compile("([A-Z0-9]+) = \\(([A-Z0-9]+), ([A-Z0-9]+)\\)")
 def solve_part1(lines: list[str]) -> int:
     directions, nodes = parse_directions_nodes(lines)
 
-    curr_node = nodes['AAA']
-    moves = compute_moves(curr_node, directions, nodes, part1_at_end_check)
+    start_node = nodes['AAA']
+    moves = compute_moves(start_node, directions, nodes, part1_at_end_check)
 
     return moves
 
@@ -22,14 +22,14 @@ def part1_at_end_check(name: str) -> bool:
 def solve_part2(lines: list[str]) -> int:
     directions, nodes = parse_directions_nodes(lines)
 
-    curr_nodes = []
+    start_nodes = []
     for name in nodes.keys():
         if name[-1] == 'A':
-            curr_nodes.append(nodes[name])
+            start_nodes.append(nodes[name])
 
     all_moves = []
-    for curr_node in curr_nodes:
-        moves = compute_moves(curr_node, directions, nodes, part2_at_end_check)
+    for start_node in start_nodes:
+        moves = compute_moves(start_node, directions, nodes, part2_at_end_check)
         all_moves.append(moves)
 
     return lcm(*all_moves)
@@ -49,7 +49,8 @@ def parse_directions_nodes(lines):
     return directions, nodes
 
 
-def compute_moves(curr_node, directions, nodes, end_check):
+def compute_moves(start_node, directions, nodes, end_check):
+    curr_node = start_node
     at_end = False
     moves = 0
     while not at_end:
