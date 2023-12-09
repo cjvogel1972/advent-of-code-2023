@@ -8,8 +8,8 @@ def solve_part1(lines: list[str]) -> int:
         diffs = compute_diffs(list(map(int, line.split())))
 
         value = 0
-        for i in range(len(diffs) - 2, -1, -1):
-            value = diffs[i][-1] + value
+        for diff in reversed(diffs):
+            value = diff[-1] + value
 
         total += value
 
@@ -23,8 +23,8 @@ def solve_part2(lines: list[str]) -> int:
         diffs = compute_diffs(list(map(int, line.split())))
 
         value = 0
-        for i in range(len(diffs) - 2, -1, -1):
-            value = diffs[i][0] - value
+        for diff in reversed(diffs):
+            value = diff[0] - value
 
         total += value
 
