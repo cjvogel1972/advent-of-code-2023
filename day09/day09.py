@@ -38,11 +38,12 @@ def compute_diffs(orig_nums: list[int]) -> list[list[int]]:
 
     while not all_zeroes:
         curr_diffs = [y - x for x, y in zip(prev_diffs, prev_diffs[1:])]
-        diffs.append(curr_diffs)
-        prev_diffs = curr_diffs
 
         if curr_diffs.count(0) == len(curr_diffs):
             all_zeroes = True
+        else:
+            diffs.append(curr_diffs)
+            prev_diffs = curr_diffs
 
     return diffs
 
