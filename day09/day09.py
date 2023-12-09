@@ -5,18 +5,7 @@ def solve_part1(lines: list[str]) -> int:
     total = 0
 
     for line in lines:
-        orig_nums = list(map(int, line.split()))
-        diffs = [orig_nums]
-        all_zeroes = False
-        prev_line = orig_nums
-        while not all_zeroes:
-            next_diffs = []
-            for i in range(len(prev_line) - 1):
-                next_diffs.append(prev_line[i + 1] - prev_line[i])
-            prev_line = next_diffs
-            diffs.append(next_diffs)
-            if next_diffs.count(0) == len(next_diffs):
-                all_zeroes = True
+        diffs = compute_diffs(list(map(int, line.split())))
 
         diffs[-1].append(0)
         for i in range(len(diffs) - 2, -1, -1):
@@ -31,18 +20,7 @@ def solve_part2(lines: list[str]) -> int:
     total = 0
 
     for line in lines:
-        orig_nums = list(map(int, line.split()))
-        diffs = [orig_nums]
-        all_zeroes = False
-        prev_line = orig_nums
-        while not all_zeroes:
-            next_diffs = []
-            for i in range(len(prev_line) - 1):
-                next_diffs.append(prev_line[i + 1] - prev_line[i])
-            prev_line = next_diffs
-            diffs.append(next_diffs)
-            if next_diffs.count(0) == len(next_diffs):
-                all_zeroes = True
+        diffs = compute_diffs(list(map(int, line.split())))
 
         diffs[-1].insert(0, 0)
         for i in range(len(diffs) - 2, -1, -1):
@@ -51,6 +29,24 @@ def solve_part2(lines: list[str]) -> int:
         total += diffs[0][0]
 
     return total
+
+
+def compute_diffs(orig_nums: list[int]) -> list[list[int]]:
+    diffs = [orig_nums]
+    all_zeroes = False
+    prev_diffs = diffs[0]
+
+    while not all_zeroes:
+        curr_diffs = []
+        for i in range(len(prev_diffs) - 1):
+            curr_diffs.append(prev_diffs[i + 1] - prev_diffs[i])
+        diffs.append(curr_diffs)
+        prev_diffs = curr_diffs
+
+        if curr_diffs.count(0) == len(curr_diffs):
+            all_zeroes = True
+
+    return diffs
 
 
 if __name__ == '__main__':
