@@ -7,11 +7,11 @@ def solve_part1(lines: list[str]) -> int:
     for line in lines:
         diffs = compute_diffs(list(map(int, line.split())))
 
-        diffs[-1].append(0)
+        value = 0
         for i in range(len(diffs) - 2, -1, -1):
-            diffs[i].append(diffs[i][-1] + diffs[i + 1][-1])
+            value = diffs[i][-1] + value
 
-        total += diffs[0][-1]
+        total += value
 
     return total
 
@@ -22,11 +22,11 @@ def solve_part2(lines: list[str]) -> int:
     for line in lines:
         diffs = compute_diffs(list(map(int, line.split())))
 
-        diffs[-1].insert(0, 0)
+        value = 0
         for i in range(len(diffs) - 2, -1, -1):
-            diffs[i].insert(0, diffs[i][0] - diffs[i + 1][0])
+            value = diffs[i][0] - value
 
-        total += diffs[0][0]
+        total += value
 
     return total
 
@@ -37,9 +37,7 @@ def compute_diffs(orig_nums: list[int]) -> list[list[int]]:
     prev_diffs = diffs[0]
 
     while not all_zeroes:
-        curr_diffs = []
-        for i in range(len(prev_diffs) - 1):
-            curr_diffs.append(prev_diffs[i + 1] - prev_diffs[i])
+        curr_diffs = [y - x for x, y in zip(prev_diffs, prev_diffs[1:])]
         diffs.append(curr_diffs)
         prev_diffs = curr_diffs
 
