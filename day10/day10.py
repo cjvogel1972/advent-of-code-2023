@@ -37,13 +37,13 @@ def compute_next_steps(grid: list[list[str]], r: int, c: int) -> list[tuple]:
     location = (r, c)
     steps = []
 
-    if is_location_in_bounds(grid, r - 1, c):
+    if r > 0:
         steps.append((location, (-1, 0)))
-    if is_location_in_bounds(grid, r + 1, c):
+    if r < len(grid) - 1:
         steps.append((location, (1, 0)))
-    if is_location_in_bounds(grid, r, c - 1):
+    if c > 0:
         steps.append((location, (0, -1)))
-    if is_location_in_bounds(grid, r, c + 1):
+    if c < len(grid[0]) - 1:
         steps.append((location, (0, 1)))
 
     return steps
@@ -51,16 +51,17 @@ def compute_next_steps(grid: list[list[str]], r: int, c: int) -> list[tuple]:
 
 def follow_pipe(grid: list[list[str]], distance: list[list[int]], location: tuple, direction: tuple) -> tuple:
     r, c = location
+    ch = grid[r][c]
     dir_r, dir_c = direction
     dist = distance[r][c]
     new_r = r + dir_r
     new_c = c + dir_c
 
-    if not is_location_in_bounds(grid, new_r, new_c):
+    if not 0 <= new_r < len(grid) and 0 <= new_c < len(grid[0]):
         return (0, 0), (0, 0)
 
-    ch = grid[new_r][new_c]
-    if ch == '.':
+    new_ch = grid[new_r][new_c]
+    if new_ch == '.':
         return (0, 0), (0, 0)
 
     if distance[new_r][new_c] != 0:
@@ -69,30 +70,26 @@ def follow_pipe(grid: list[list[str]], distance: list[list[int]], location: tupl
         return (0, 0), (0, 0)
 
     if dir_r != 0:
-        if ch in '|FLJ7':
+        if new_ch in '|FLJ7':
             distance[new_r][new_c] = dist + 1
-        if ch == '|':
+        if new_ch == '|':
             return (new_r, new_c), direction
-        if ch in 'FL':
+        if new_ch in 'FL':
             return (new_r, new_c), (0, 1)
-        if ch in 'J7':
+        if new_ch in 'J7':
             return (new_r, new_c), (0, -1)
 
     if dir_c != 0:
-        if ch in ('-', 'F', '7', 'J', 'L'):
+        if new_ch in ('-', 'F', '7', 'J', 'L'):
             distance[new_r][new_c] = dist + 1
-        if ch == '-':
+        if new_ch == '-':
             return (new_r, new_c), direction
-        if ch in ('F', '7'):
+        if new_ch in ('F', '7'):
             return (new_r, new_c), (1, 0)
-        if ch in ('J', 'L'):
+        if new_ch in ('J', 'L'):
             return (new_r, new_c), (-1, 0)
 
     return (0, 0), (0, 0)
-
-
-def is_location_in_bounds(grid: list[list[str]], r: int, c: int) -> bool:
-    return 0 <= r < len(grid) and 0 <= c < len(grid[0])
 
 
 def solve_part2(lines: list[str]) -> int:
@@ -106,7 +103,7 @@ def solve_part2(lines: list[str]) -> int:
         for c, d in enumerate(row):
             if d == 0 and grid[r][c] != 'S':
                 grid[r][c] = '.'
-    grid[start[0]][start[1]] = '-'
+    grid[start[0]][start[1]] = solve_start_pipe(grid, start)
 
     for r, row in enumerate(grid):
         outside = True
@@ -118,11 +115,23 @@ def solve_part2(lines: list[str]) -> int:
             if ch in '|LJ':
                 outside = not outside
 
-    total = 0
-    for row in grid:
-        total += row.count('I')
+    return sum([row.count('I') for row in grid])
 
-    return total
+
+def solve_start_pipe(grid: list[list[str]], start: tuple) -> str:
+    possible_s = {'|', '-', 'F', 'L', 'J', '7'}
+
+    start_row, start_column = start
+    if start_row > 0 and grid[start_row - 1][start_column] in '|F7':
+        possible_s.intersection_update({'|', 'L', 'J'})
+    if start_row < len(grid) - 1 and grid[start_row + 1][start_column] in '|LJ':
+        possible_s.intersection_update({'|', 'F', '7'})
+    if start_column > 0 and grid[start_row][start_column - 1] in '-LF':
+        possible_s.intersection_update({'-', 'J', '7'})
+    if start_column < len(grid[0]) - 1 and grid[start_row][start_column + 1] in '-7J':
+        possible_s.intersection_update({'-', 'L', 'F'})
+
+    return possible_s.pop()
 
 
 if __name__ == '__main__':
