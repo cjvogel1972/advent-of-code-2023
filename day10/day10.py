@@ -96,7 +96,31 @@ def is_location_in_bounds(grid: list[list[str]], r: int, c: int) -> bool:
 
 
 def solve_part2(lines: list[str]) -> int:
+    grid, distance = create_grids(lines)
+    start = find_start(grid)
+
+    compute_pipe_distances(grid, distance, start)
+
+    # get rid of unnecessary pipes
+    for r, row in enumerate(distance):
+        for c, d in enumerate(row):
+            if d == 0 and grid[r][c] != 'S':
+                grid[r][c] = '.'
+    grid[start[0]][start[1]] = '-'
+
+    for r, row in enumerate(grid):
+        outside = True
+        for c, ch in enumerate(row):
+            if ch == '.' and outside:
+                grid[r][c] = 'O'
+            elif ch == '.' and not outside:
+                grid[r][c] = 'I'
+            if ch in '|LJ':
+                outside = not outside
+
     total = 0
+    for row in grid:
+        total += row.count('I')
 
     return total
 
