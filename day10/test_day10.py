@@ -5,15 +5,6 @@ import day10 as day
 
 class Test(unittest.TestCase):
 
-    def setUp(self):
-        self.lines = [
-            "7-F7-",
-            ".FJ|7",
-            "SJLL7",
-            "|F--J",
-            "LJ.LJ"
-        ]
-
     def test_solve_part1_square_loop(self):
         lines = [
             ".....",
