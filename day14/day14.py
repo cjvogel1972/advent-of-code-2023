@@ -1,6 +1,7 @@
 import copy
 
 from util.file import readfile
+from util.grid import good_square
 
 
 def solve_part1(lines: list[str]) -> int:
@@ -29,32 +30,27 @@ def move_rock(grid: list[list[str]], r: int, c: int, r_dir: int, c_dir: int):
         grid[r][c] = "."
 
 
-def good_square(grid: list[list[str]], r: int, c: int) -> bool:
-    return 0 <= r <= len(grid) - 1 and 0 <= c <= len(grid[r]) - 1
-
-
 def solve_part2(lines: list[str]) -> int:
     total = 0
 
     grid = [list(line) for line in lines]
     cache = {platform_to_string(grid)}
     grids = [copy.deepcopy(grid)]
-    for i in range(1000000000):
+    last = 1000000000
+    for i in range(last):
         cycle(grid)
 
         grid_str = platform_to_string(grid)
         if grid_str in cache:
+            last = i + 1
             break
 
         cache.add(grid_str)
         grids.append(copy.deepcopy(grid))
 
-    last = i + 1
     start_loop = grids.index(grid)
     loop_length = last - start_loop
-    delta = (1000000000 - start_loop) % loop_length
-    for _ in range(delta):
-        cycle(grid)
+    grid = grids[(1000000000 - start_loop) % loop_length + start_loop]
 
     for r, row in enumerate(grid):
         total += row.count("O") * (len(grid) - r)

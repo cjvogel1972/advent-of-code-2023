@@ -31,5 +31,6 @@ class Test(unittest.TestCase):
         day.cycle(grid)
         self.assertEqual(expected, day.platform_to_string(grid))
 
+
 if __name__ == '__main__':
     unittest.main()
