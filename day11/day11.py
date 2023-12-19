@@ -1,4 +1,5 @@
 from util.file import readfile
+from util.grid import manhattan_distance
 
 
 def solve(lines: list[str], expansion: int) -> int:
@@ -7,7 +8,7 @@ def solve(lines: list[str], expansion: int) -> int:
     return compute_total_shortest_distance(galaxies)
 
 
-def find_galaxies(lines):
+def find_galaxies(lines: list[str]):
     galaxies = []
 
     for r, row in enumerate(lines):
@@ -16,11 +17,11 @@ def find_galaxies(lines):
             c = row.index("#", start_loc)
             galaxies.append((r, c))
             start_loc = c + 1
-            
+
     return galaxies
 
 
-def expand_universe(galaxies, lines, expansion):
+def expand_universe(galaxies: list[tuple[int, int]], lines: list[str], expansion: int):
     for r, row in reversed(list(enumerate(lines))):
         if row.count('.') == len(row):
             for g, galaxy in enumerate(galaxies):
@@ -38,11 +39,8 @@ def expand_universe(galaxies, lines, expansion):
 def compute_total_shortest_distance(galaxies) -> int:
     total = 0
 
-    for i in range(len(galaxies) - 1):
-        g1 = galaxies[i]
-        for j in range(i + 1, len(galaxies)):
-            g2 = galaxies[j]
-            total += abs(g1[0] - g2[0]) + abs(g1[1] - g2[1])
+    for g, g1 in enumerate(galaxies[:-1]):
+        total += sum([manhattan_distance(g1, g2) for g2 in galaxies[g + 1:]])
 
     return total
 
