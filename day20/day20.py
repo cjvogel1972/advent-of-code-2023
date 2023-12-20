@@ -16,44 +16,47 @@ def solve_part1(lines: list[str]) -> int:
         queue = [('broadcaster', '', low)]
         while queue:
             name, prev, pulse = queue.pop()
-            module = modules[name]
-            module_type = module[0]
-            destinations = module[1]
-            state = module[2]
+
+            module_type, destinations, state = modules[name]
+
             if name == 'broadcaster':
-                for destination in destinations:
-                    if pulse == low:
-                        low_count += 1
-                    else:
-                        high_count += 1
-                    if destination in modules:
-                        queue.insert(0, (destination, name, pulse))
+                low_count, high_count = add_pulse_counts(low_count, high_count, pulse, len(destinations))
+                add_destinations(queue, modules, name, pulse, destinations)
             elif module_type == '%':
                 if pulse == high:
                     continue
+
                 new_pulse = high if not state else low
-                for destination in destinations:
-                    if new_pulse == low:
-                        low_count += 1
-                    else:
-                        high_count += 1
-                    if destination in modules:
-                        queue.insert(0, (destination, name, new_pulse))
+
+                low_count, high_count = add_pulse_counts(low_count, high_count, new_pulse, len(destinations))
+                add_destinations(queue, modules, name, new_pulse, destinations)
+
                 modules[name] = (module_type, destinations, not state)
             elif module_type == '&':
                 state[prev] = pulse
 
                 all_high = all([value == high for value in state.values()])
                 new_pulse = low if all_high else high
-                for destination in destinations:
-                    if new_pulse == low:
-                        low_count += 1
-                    else:
-                        high_count += 1
-                    if destination in modules:
-                        queue.insert(0, (destination, name, new_pulse))
+
+                low_count, high_count = add_pulse_counts(low_count, high_count, new_pulse, len(destinations))
+                add_destinations(queue, modules, name, new_pulse, destinations)
 
     return low_count * high_count
+
+
+def add_pulse_counts(low_count, high_count, pulse, dest_count):
+    if pulse == low:
+        low_count += dest_count
+    else:
+        high_count += dest_count
+
+    return low_count, high_count
+
+
+def add_destinations(queue, modules, name, pulse, destinations):
+    for destination in destinations:
+        if destination in modules:
+            queue.insert(0, (destination, name, pulse))
 
 
 def solve_part2(lines: list[str]) -> int:
@@ -70,37 +73,35 @@ def solve_part2(lines: list[str]) -> int:
         queue = [('broadcaster', '', low)]
         while queue:
             name, prev, pulse = queue.pop()
-            module = modules[name]
-            module_type = module[0]
-            destinations = module[1]
-            state = module[2]
+
+            module_type, destinations, state = modules[name]
+
             if name == 'broadcaster':
-                for destination in destinations:
-                    if destination in modules:
-                        queue.insert(0, (destination, name, pulse))
+                add_destinations(queue, modules, name, pulse, destinations)
             elif module_type == '%':
                 if pulse == high:
                     continue
+
                 new_pulse = high if not state else low
+
                 if name in counts and new_pulse == high and counts[name] == 0:
                     counts[name] = button_pushes
-                for destination in destinations:
-                    if destination in modules:
-                        queue.insert(0, (destination, name, new_pulse))
+
+                add_destinations(queue, modules, name, new_pulse, destinations)
                 modules[name] = (module_type, destinations, not state)
             elif module_type == '&':
                 state[prev] = pulse
 
                 all_high = all([value == high for value in state.values()])
                 new_pulse = low if all_high else high
+
                 if name in counts and new_pulse == high and counts[name] == 0:
                     counts[name] = button_pushes
-                for destination in destinations:
-                    if destination in modules:
-                        queue.insert(0, (destination, name, new_pulse))
 
-            if all(x > 0 for x in counts.values()):
-                done = True
+                add_destinations(queue, modules, name, new_pulse, destinations)
+
+        if all(x > 0 for x in counts.values()):
+            done = True
 
     return lcm(*[x for x in counts.values()])
 
@@ -109,23 +110,22 @@ def parse_modules(lines):
     modules = {}
     for line in lines:
         module, destinations = line.split(" -> ")
-        if module != "broadcaster":
+        if module == "broadcaster":
+            module_type = ""
+            name = module
+            data = ()
+        else:
             module_type = module[0]
             name = module[1:]
             if module_type == "%":
                 data = False
-            if module_type == "&":
-                data = defaultdict()
-        else:
-            module_type = "$"
-            name = module
-            data = ()
+            else:
+                data = {}
 
         modules[name] = (module_type, destinations.split(', '), data)
 
     for name, module in modules.items():
-        module_type = module[0]
-        state = module[2]
+        module_type, _, state = module
         if module_type == '&':
             for name2, module2 in modules.items():
                 other_destinations = module2[1]
