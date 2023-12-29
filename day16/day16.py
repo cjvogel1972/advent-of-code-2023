@@ -1,4 +1,6 @@
 from util.file import readfile
+from util.grid import good_square
+from util.tuple import tuple_add
 
 
 def solve_part1(lines: list[str]) -> int:
@@ -35,16 +37,13 @@ def determined_number_energized_grids(grid: list[list[str]], start: tuple, direc
     seen = set()
     follow_light(grid, energized_grid, seen, start, direction)
 
-    total = 0
-    total += sum([sum([1 if x == '#' else 0 for x in row]) for row in energized_grid])
-
-    return total
+    return sum([sum([1 if x == '#' else 0 for x in row]) for row in energized_grid])
 
 
 def follow_light(grid: list[list[str]], energized_grid: list[list[str]], seen: set[tuple], loc: tuple,
                  direction: tuple):
     while True:
-        if 0 > loc[0] or loc[0] >= len(grid) or 0 > loc[1] or loc[1] >= len(grid[0]):
+        if not good_square(grid, *loc):
             return
 
         if (loc, direction) in seen:
@@ -55,45 +54,33 @@ def follow_light(grid: list[list[str]], energized_grid: list[list[str]], seen: s
         energized_grid[loc[0]][loc[1]] = '#'
 
         if ch == '.':
-            loc = (loc[0] + direction[0], loc[1] + direction[1])
+            loc = tuple_add(loc, direction)
         elif ch in '|-':
-            if direction[0] != 0 and ch == '|':
-                loc = (loc[0] + direction[0], loc[1] + direction[1])
-            elif direction[0] != 0 and ch == '-':
+            if direction[0] != 0 and ch == '-':
                 follow_light(grid, energized_grid, seen, (loc[0], loc[1] - 1), (0, -1))
-                loc = (loc[0], loc[1] + 1)
                 direction = (0, 1)
-            elif direction[1] != 0 and ch == '-':
-                loc = (loc[0] + direction[0], loc[1] + direction[1])
             elif direction[1] != 0 and ch == '|':
                 follow_light(grid, energized_grid, seen, (loc[0] - 1, loc[1]), (-1, 0))
-                loc = (loc[0] + 1, loc[1])
                 direction = (1, 0)
+            loc = tuple_add(loc, direction)
         elif ch in '/\\':
             if direction[0] == 1 and ch == '\\':
                 direction = (0, 1)
-                loc = (loc[0], loc[1] + 1)
             elif direction[0] == -1 and ch == '\\':
                 direction = (0, -1)
-                loc = (loc[0], loc[1] - 1)
             elif direction[1] == 1 and ch == '\\':
                 direction = (1, 0)
-                loc = (loc[0] + 1, loc[1])
             elif direction[1] == -1 and ch == '\\':
                 direction = (-1, 0)
-                loc = (loc[0] - 1, loc[1])
             elif direction[0] == 1 and ch == '/':
                 direction = (0, -1)
-                loc = (loc[0], loc[1] - 1)
             elif direction[0] == -1 and ch == '/':
                 direction = (0, 1)
-                loc = (loc[0], loc[1] + 1)
             elif direction[1] == 1 and ch == '/':
                 direction = (-1, 0)
-                loc = (loc[0] - 1, loc[1])
             elif direction[1] == -1 and ch == '/':
                 direction = (1, 0)
-                loc = (loc[0] + 1, loc[1])
+            loc = tuple_add(loc, direction)
 
 
 if __name__ == '__main__':
