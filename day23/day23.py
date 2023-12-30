@@ -6,13 +6,14 @@ def solve_part1(lines: list[str]) -> int:
     start = (0, lines[0].index('.'))
     end = (len(lines) - 1, lines[-1].index('.'))
     grid = [list(line) for line in lines]
+    visited = set()
 
-    nodes = find_nodes(grid, start, end)
+    nodes = find_nodes(grid, start, end, visited)
 
-    return len(nodes[start].find_longest_path(nodes)) - 1
+    return nodes[start].find_longest_path(nodes) - 1
 
 
-def find_nodes(grid, loc, end, visited=set()) -> dict:
+def find_nodes(grid, loc, end, visited) -> dict:
     nodes = {}
     q = [(loc, None)]
     while q:
@@ -41,21 +42,21 @@ class Node:
     def __init__(self, r, c: int):
         self.r, self.c = r, c
         self.neighbors = set()
-        self.path = []
+        self.steps = -1
 
-    def find_longest_path(self, nodes: dict) -> list:
-        if self.path:
-            return self.path
+    def find_longest_path(self, nodes: dict) -> int:
+        if self.steps != -1:
+            return self.steps
 
         current = self
-        straight_path = []
+        steps = 0
         while True:
-            longest_path = []
+            longest_path = 0
             if current.neighbors:
                 if len(current.neighbors) == 1:
                     for n in current.neighbors:
                         current = nodes[n]
-                        straight_path.append(current)
+                        steps += 1
                     continue
 
                 possible_paths = []
@@ -63,15 +64,14 @@ class Node:
                     possible_paths.append(nodes[n].find_longest_path(nodes))
 
                 if possible_paths:
-                    longest_path = max(possible_paths, key=len)
+                    longest_path = max(possible_paths)
 
-            current.path = longest_path.copy()
+            current.steps = longest_path
             break
 
-        straight_path.extend(current.path)
-        straight_path.insert(0, self)
-        self.path = straight_path
-        return straight_path
+        steps += current.steps + 1
+        self.steps = steps
+        return steps
 
     def __repr__(self):
         return f'Node({self.r},{self.c})'
