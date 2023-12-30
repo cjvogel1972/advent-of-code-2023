@@ -1,11 +1,8 @@
-import sys
-
 from util.file import readfile
 from util.grid import good_square
 
 
 def solve_part1(lines: list[str]) -> int:
-    sys.setrecursionlimit(10000)
     start = (0, lines[0].index('.'))
     end = (len(lines) - 1, lines[-1].index('.'))
     grid = [list(line) for line in lines]
@@ -50,20 +47,34 @@ class Node:
         if self.path:
             return self.path
 
-        longest_path = []
-        if self.neighbors:
-            possible_paths = []
-            for n in self.neighbors:
-                possible_paths.append(nodes[n].find_longest_path(nodes))
+        current = self
+        straight_path = []
+        while True:
+            longest_path = []
+            if current.neighbors:
+                if len(current.neighbors) == 1:
+                    for n in current.neighbors:
+                        current = nodes[n]
+                        straight_path.append(current)
+                    continue
 
-            if possible_paths:
-                longest_path = max(possible_paths, key=len)
-                longest_path.append(self)
+                possible_paths = []
+                for n in current.neighbors:
+                    possible_paths.append(nodes[n].find_longest_path(nodes))
 
-        if not longest_path:
-            longest_path.append(self)
-        self.path = longest_path.copy()
-        return longest_path
+                if possible_paths:
+                    longest_path = max(possible_paths, key=len)
+
+            current.path = longest_path.copy()
+            break
+
+        straight_path.extend(current.path)
+        straight_path.insert(0, self)
+        self.path = straight_path
+        return straight_path
+
+    def __repr__(self):
+        return f'Node({self.r},{self.c})'
 
 
 def solve_part2(lines: list[str]) -> int:
